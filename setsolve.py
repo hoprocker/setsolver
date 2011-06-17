@@ -24,6 +24,8 @@ First, some protocols:
 """
 
 TRANS_TABLE = [["1","2","3"], ["r","g","p"], ["b","c","f"], ["d","s","o"]]
+DEBUG = False
+
 def readCard(card):
     card = card.strip()
     
@@ -34,23 +36,23 @@ def readDeck(f_name):
 
 def findSets(deck_f_name):
     deck = readDeck(deck_f_name)
-    print "deck: %s" % (deck,)
+    if DEBUG: print "deck: %s" % (deck,)
     sets = []
     for card in deck:
-        print "testing %s" % (card,)
+        if DEBUG: print "testing %s" % (card,)
         card = vectorFromRepr(card)
         for dim_limit in range(1,len(card)+1):
             for dims in dimensionCombinations(dim_limit):
                 test_card = list(card)
                 for dim in dims:
-                    print "dimension %d" % dim
+                    if DEBUG: print "dimension %d" % dim
                     test_card[dim] = list(set(range(3)).difference(card[dim]))
                 ##res = filter(lambda d: len(d) == len(card)-1 and False not in d, findSetTree(test_card, deck))
                 res = filter(lambda d: False not in d, findSetTree(test_card, deck))
                 if len(res) > 0:
                     map(lambda d: d.append(card), res)
                     map(lambda d: sets.append(d), res)
-    sets = map(lambda s: map(reprFromVector, s), sets)
+    sets = map(lambda s: map(lambda d: friendlyCardRepr(reprFromVector(d)), s), sets)
     map(lambda s: s.sort(), sets)
     ret = []
     for s in sets:
@@ -60,11 +62,11 @@ def findSets(deck_f_name):
 
 def findSetTree(card_vars_vector, deck):
     permutations = findPermutations(card_vars_vector)
-    print "permutations: %s" % (permutations,)
+    if DEBUG: print "permutations: %s" % (permutations,)
 
     if len(permutations) == 1:
         if cardExists(permutations[0], deck):
-            print "KAZAA"
+            if DEBUG: print "KAZAA"
             return card_vars_vector
         else:
             return False
@@ -85,7 +87,7 @@ def findPermutations(card_vars_vector):
         ## just one card
         return [card_vars_vector,]
 
-    ##print "finding permutations for %d dimensions" % (len(dims))
+    ##if DEBUG: print "finding permutations for %d dimensions" % (len(dims))
     ## tricky bit here; need to keep dims coordinated with variant values
     variants = [card_vars_vector[i] for i in dims]
     perms = []
@@ -94,7 +96,7 @@ def findPermutations(card_vars_vector):
         for d_idx in range(len(dims)):  ## <-- argh!!!
             card_perm[dims[d_idx]] = [prod[d_idx],]
         perms.append(card_perm)
-    ##print "%d permutations found" % (len(perms))
+    ##if DEBUG: print "%d permutations found" % (len(perms))
     return perms
 
 def cardVectorComplement(card_vector, card_comp):
@@ -125,11 +127,17 @@ def vectorFromRepr(card):
 def dimensionCombinations(cnt):
     return list(itertools.combinations(range(4), cnt))
 
+def friendlyCardRepr(card):
+    return "".join([TRANS_TABLE[i][int(card[i])] for i in range(0, len(card))])
+
 
 def main():
     if len(sys.argv) > 1:
         sets_res = findSets(sys.argv[1])
     else:
-        print "please specify a file to read the deck from."
+        if DEBUG: print "please specify a file to read the deck from."
         sys.exit(0)
-    print sets_res
+    print "SETS:  %s" % (sets_res,)
+
+if __name__ == "__main__":
+    main()

@@ -58,8 +58,7 @@ def test_cardVariantDims():
 
 def test_findSets():
     res = setsolve.findSets(TEST_DECK)
-    ##sets = setsolve.readDeck(TEST_DECK_SETS)
-    sets = [['0102', '1102', '2102'], ['1011', '1111', '1211']]
+    sets = [["1gbo","2gbo","3gbo"], ["2gcs","2pcs","2rcs"]]
     print "SETS:%s" % (res,)
     assert len(res) == len(sets)
     for res_set in res:
